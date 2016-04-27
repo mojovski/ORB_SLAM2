@@ -198,7 +198,7 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRe
 
     mCurrentFrame = Frame(mImGray,imGrayRight,timestamp,mpORBextractorLeft,mpORBextractorRight,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
 
-    Track();
+    Track("");
 
     return mCurrentFrame.mTcw.clone();
 }
@@ -229,13 +229,13 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
 
     mCurrentFrame = Frame(mImGray,imDepth,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
 
-    Track();
+    Track("");
 
     return mCurrentFrame.mTcw.clone();
 }
 
 
-cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
+cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const string& img_name, const double &timestamp)
 {
     mImGray = im;
 
@@ -253,18 +253,25 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
         else
             cvtColor(mImGray,mImGray,CV_BGRA2GRAY);
     }
+    if (mImGray.type()!=CV_8UC1)
+    {
+        std::cerr << "The image you passed is of wrong format. Its must be 8bit! Please use mogrify -depth 8 to convert it!" << std::endl;
+        throw std::runtime_error("Error: The passed image must be of 8 bit!");
+    }
+
 
     if(mState==NOT_INITIALIZED || mState==NO_IMAGES_YET)
-        mCurrentFrame = Frame(mImGray,timestamp,mpIniORBextractor,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
+        mCurrentFrame = Frame(mImGray,timestamp,mpIniORBextractor,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth, img_name);
     else
-        mCurrentFrame = Frame(mImGray,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
+        mCurrentFrame = Frame(mImGray,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth, img_name);
+    //mCurrentFrame.name=img_name;
 
-    Track();
+    Track(img_name);
 
     return mCurrentFrame.mTcw.clone();
 }
 
-void Tracking::Track()
+void Tracking::Track(const string& img_name)
 {
     if(mState==NO_IMAGES_YET)
     {
@@ -279,9 +286,9 @@ void Tracking::Track()
     if(mState==NOT_INITIALIZED)
     {
         if(mSensor==System::STEREO || mSensor==System::RGBD)
-            StereoInitialization();
+            StereoInitialization(img_name);
         else
-            MonocularInitialization();
+            MonocularInitialization(img_name);
 
         mpFrameDrawer->Update(this);
 
@@ -455,7 +462,7 @@ void Tracking::Track()
 
             // Check if we need to insert a new keyframe
             if(NeedNewKeyFrame())
-                CreateNewKeyFrame();
+                CreateNewKeyFrame(img_name);
 
             // We allow points with high innovation (considererd outliers by the Huber Function)
             // pass to the new keyframe, so that bundle adjustment will finally decide
@@ -483,6 +490,7 @@ void Tracking::Track()
             mCurrentFrame.mpReferenceKF = mpReferenceKF;
 
         mLastFrame = Frame(mCurrentFrame);
+        mLastFrame.name=img_name;
     }
 
     // Store frame pose information to retrieve the complete camera trajectory afterwards.
@@ -506,7 +514,7 @@ void Tracking::Track()
 }
 
 
-void Tracking::StereoInitialization()
+void Tracking::StereoInitialization(const std::string& fr_name)
 {
     if(mCurrentFrame.N>500)
     {
@@ -560,7 +568,7 @@ void Tracking::StereoInitialization()
     }
 }
 
-void Tracking::MonocularInitialization()
+void Tracking::MonocularInitialization(const std::string& fr_name)
 {
 
     if(!mpInitializer)
@@ -629,12 +637,12 @@ void Tracking::MonocularInitialization()
             tcw.copyTo(Tcw.rowRange(0,3).col(3));
             mCurrentFrame.SetPose(Tcw);
 
-            CreateInitialMapMonocular();
+            CreateInitialMapMonocular(fr_name);
         }
     }
 }
 
-void Tracking::CreateInitialMapMonocular()
+void Tracking::CreateInitialMapMonocular(const std::string& fr_name)
 {
     // Create KeyFrames
     KeyFrame* pKFini = new KeyFrame(mInitialFrame,mpMap,mpKeyFrameDB);
@@ -763,6 +771,7 @@ bool Tracking::TrackReferenceKeyFrame()
     // If enough matches are found we setup a PnP solver
     ORBmatcher matcher(0.7,true);
     vector<MapPoint*> vpMapPointMatches;
+    std::cout << "\nfound " << vpMapPointMatches.size() << " matches" << std::endl;
 
     int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
 
@@ -1060,12 +1069,13 @@ bool Tracking::NeedNewKeyFrame()
         return false;
 }
 
-void Tracking::CreateNewKeyFrame()
+void Tracking::CreateNewKeyFrame(const string& img_name)
 {
     if(!mpLocalMapper->SetNotStop(true))
         return;
 
     KeyFrame* pKF = new KeyFrame(mCurrentFrame,mpMap,mpKeyFrameDB);
+    pKF->name=img_name;
 
     mpReferenceKF = pKF;
     mCurrentFrame.mpReferenceKF = pKF;

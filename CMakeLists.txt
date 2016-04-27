@@ -104,3 +104,7 @@ add_executable(mono_euroc
 Examples/Monocular/mono_euroc.cc)
 target_link_libraries(mono_euroc ${PROJECT_NAME})
 
+add_executable(mono_nvm
+Examples/Monocular/mono_nvm.cc)
+target_link_libraries(mono_nvm ${PROJECT_NAME})
+
