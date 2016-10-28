@@ -85,6 +85,11 @@ add_executable(stereo_kitti
 Examples/Stereo/stereo_kitti.cc)
 target_link_libraries(stereo_kitti ${PROJECT_NAME})
 
+
+add_executable(stereo_nvm
+Examples/Stereo/stereo_nvm.cc)
+target_link_libraries(stereo_nvm ${PROJECT_NAME})
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Monocular)
 
 add_executable(mono_tum
@@ -98,4 +103,5 @@ target_link_libraries(mono_kitti ${PROJECT_NAME})
 add_executable(mono_nvm
 Examples/Monocular/mono_nvm.cc)
 target_link_libraries(mono_nvm ${PROJECT_NAME})
+
 
