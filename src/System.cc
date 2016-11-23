@@ -557,5 +557,21 @@ void System::SaveNVM(const std::string& nvmStrFile)
 
     }
 
+    void SaveJson(const string& filename)
+    {
+        //TODO
+        /*
+        camera calib: fx, fy, cx, cy, k1, k2, k3
+        a list of frames. Each key frame: 
+        {
+            * imagename
+            * pose
+            * list of 3d points
+            * list of neihbouring key frames
+            
+        }
+        */
+    }
+
 
 } //namespace ORB_SLAM

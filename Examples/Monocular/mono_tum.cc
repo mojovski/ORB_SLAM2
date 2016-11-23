@@ -45,6 +45,7 @@ int main(int argc, char **argv)
     vector<string> vstrImageFilenames;
     vector<double> vTimestamps;
     string strFile = string(argv[3])+"/rgb.txt";
+    std::cout << "Received:\n\tvocabulary: " << argv[1] << "\n\tsettings: " << argv[2] << "\n\tImage list file: " << strFile << "\n"; 
     LoadImages(strFile, vstrImageFilenames, vTimestamps);
 
     int nImages = vstrImageFilenames.size();
@@ -135,6 +136,7 @@ void LoadImages(const string &strFile, vector<string> &vstrImageFilenames, vecto
     getline(f,s0);
     getline(f,s0);
     getline(f,s0);
+    std::cout << "Loading images...";
 
     while(!f.eof())
     {
@@ -152,4 +154,5 @@ void LoadImages(const string &strFile, vector<string> &vstrImageFilenames, vecto
             vstrImageFilenames.push_back(sRGB);
         }
     }
+    std::cout << " done!\n";
 }

@@ -115,6 +115,11 @@ public:
     // Save the world as a NVM file
     void SaveNVM(const string& filename);
 
+    /*Saves the whole world as a json file
+    @param filename: Destination filename
+    */
+    void SaveJson(const string& filename);
+
 private:
 
     // Input sensor
