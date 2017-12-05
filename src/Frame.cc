@@ -142,7 +142,9 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeSt
 
     UndistortKeyPoints();
 
-    ComputeStereoFromRGBD(imDepth);
+    cv::Mat imDepth_scaled;
+    cv::resize(imDepth, imDepth_scaled,  imGray.size(), cv::INTER_NEAREST);
+    ComputeStereoFromRGBD(imDepth_scaled);
 
     mvpMapPoints = vector<MapPoint*>(N,static_cast<MapPoint*>(NULL));
     mvbOutlier = vector<bool>(N,false);
@@ -665,7 +667,7 @@ void Frame::ComputeStereoFromRGBD(const cv::Mat &imDepth)
 
 cv::Mat Frame::UnprojectStereo(const int &i)
 {
-    const float z = mvDepth[i];
+    const float z = mvDepth[i];///1000.0;
     if(z>0)
     {
         const float u = mvKeysUn[i].pt.x;
