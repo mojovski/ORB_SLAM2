@@ -60,7 +60,7 @@ public:
     // Preprocess the input and call Track(). Extract features and performs stereo matching.
     cv::Mat GrabImageStereo(const cv::Mat &imRectLeft,const cv::Mat &imRectRight, const double &timestamp);
     cv::Mat GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const double &timestamp);
-    cv::Mat GrabImageMonocular(const cv::Mat &im, const double &timestamp);
+    cv::Mat GrabImageMonocular(const cv::Mat &im,  const string& img_name, const double &timestamp);
 
     void SetLocalMapper(LocalMapping* pLocalMapper);
     void SetLoopClosing(LoopClosing* pLoopClosing);
@@ -118,14 +118,14 @@ public:
 protected:
 
     // Main tracking function. It is independent of the input sensor.
-    void Track();
+    void Track(const std::string& img_name);
 
     // Map initialization for stereo and RGB-D
-    void StereoInitialization();
+    void StereoInitialization(const std::string& fr_name);
 
     // Map initialization for monocular
-    void MonocularInitialization();
-    void CreateInitialMapMonocular();
+    void MonocularInitialization(const std::string& fr_name);
+    void CreateInitialMapMonocular(const std::string& fr_name);
 
     void CheckReplacedInLastFrame();
     bool TrackReferenceKeyFrame();
@@ -142,7 +142,7 @@ protected:
     void SearchLocalPoints();
 
     bool NeedNewKeyFrame();
-    void CreateNewKeyFrame();
+    void CreateNewKeyFrame(const string& img_name);
 
     // In case of performing only localization, this flag is true when there are no matches to
     // points in the map. Still tracking will continue if there are enough matches with temporal points.

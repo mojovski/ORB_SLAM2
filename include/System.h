@@ -75,7 +75,7 @@ public:
     // Proccess the given monocular frame
     // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
     // Returns the camera pose (empty if tracking fails).
-    cv::Mat TrackMonocular(const cv::Mat &im, const double &timestamp);
+    cv::Mat TrackMonocular(const cv::Mat &im, const string& img_name, const double &timestamp);
 
     // This stops local mapping thread (map building) and performs only camera tracking.
     void ActivateLocalizationMode();
@@ -121,6 +121,13 @@ public:
     int GetTrackingState();
     std::vector<MapPoint*> GetTrackedMapPoints();
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
+    // Save the world as a NVM file
+    void SaveNVM(const string& filename);
+
+    /*Saves the whole world as a json file
+    @param filename: Destination filename
+    */
+    void SaveJson(const string& filename);
 
 private:
 
@@ -169,11 +176,17 @@ private:
     bool mbActivateLocalizationMode;
     bool mbDeactivateLocalizationMode;
 
+<<<<<<< HEAD
     // Tracking state
     int mTrackingState;
     std::vector<MapPoint*> mTrackedMapPoints;
     std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
     std::mutex mMutexState;
+=======
+    cv::FileStorage fsSettings;
+
+    std::string formatInt(long num, int size);
+>>>>>>> 3acdaccf43bd524f665a0213f5e5d0abd84df0af
 };
 
 }// namespace ORB_SLAM
