@@ -90,7 +90,7 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr& msg)
         return;
     }
 
-    mpSLAM->TrackMonocular(cv_ptr->image,cv_ptr->header.stamp.toSec());
+    mpSLAM->TrackMonocular(cv_ptr->image, "rosimg", cv_ptr->header.stamp.toSec());
 }
 
 

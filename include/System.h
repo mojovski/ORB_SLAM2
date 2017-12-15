@@ -129,6 +129,10 @@ public:
     */
     void SaveJson(const string& filename);
 
+    void getPoseLastKF(cv::Mat& R, cv::Mat& t);
+
+    Tracking* getTracker(){return mpTracker;}
+
 private:
 
     // Input sensor
@@ -176,17 +180,14 @@ private:
     bool mbActivateLocalizationMode;
     bool mbDeactivateLocalizationMode;
 
-<<<<<<< HEAD
     // Tracking state
     int mTrackingState;
     std::vector<MapPoint*> mTrackedMapPoints;
     std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
     std::mutex mMutexState;
-=======
     cv::FileStorage fsSettings;
 
     std::string formatInt(long num, int size);
->>>>>>> 3acdaccf43bd524f665a0213f5e5d0abd84df0af
 };
 
 }// namespace ORB_SLAM

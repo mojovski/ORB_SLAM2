@@ -257,7 +257,7 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const string& img_name, const 
     }
     }
 
-    cv::Mat Tcw = mpTracker->GrabImageMonocular(im,timestamp);
+    cv::Mat Tcw = mpTracker->GrabImageMonocular(im,"img", timestamp);
 
     unique_lock<mutex> lock2(mMutexState);
     mTrackingState = mpTracker->mState;
@@ -471,7 +471,6 @@ void System::SaveTrajectoryKITTI(const string &filename)
     cout << endl << "trajectory saved!" << endl;
 }
 
-<<<<<<< HEAD
 int System::GetTrackingState()
 {
     unique_lock<mutex> lock(mMutexState);
@@ -489,7 +488,6 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
     unique_lock<mutex> lock(mMutexState);
     return mTrackedKeyPointsUn;
 }
-=======
 std::string System::formatInt(long num, int size) {
   std::ostringstream oss;
   oss << std::setfill('0') << std::setw(size) << num;
@@ -499,6 +497,22 @@ std::string System::formatInt(long num, int size) {
 
 
 
+void System::getPoseLastKF(cv::Mat& R, cv::Mat& t)
+{
+    vector<KeyFrame*> vpKFs = mpMap->GetAllKeyFrames();
+    KeyFrame* pKF = vpKFs[vpKFs.size()-1];
+    if(pKF->isBad())
+    {
+        std::cout << "KeyFrame is bad...\n";
+        return;
+    }
+
+    R = pKF->GetRotation();//.t();
+    //vector<float> q = Converter::toQuaternion(R);
+    t = pKF->GetCameraCenter();
+
+
+}
 void System::SaveNVM(const std::string& nvmStrFile)
 {
     double cx=(double)fsSettings["Camera.cx"];
@@ -630,6 +644,5 @@ void System::SaveNVM(const std::string& nvmStrFile)
         */
     }
 
->>>>>>> 3acdaccf43bd524f665a0213f5e5d0abd84df0af
 
 } //namespace ORB_SLAM

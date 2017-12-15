@@ -110,6 +110,13 @@ void ImageGrabber::GrabRGBD(const sensor_msgs::ImageConstPtr& msgRGB,const senso
     }
 
     mpSLAM->TrackRGBD(cv_ptrRGB->image,cv_ptrD->image,cv_ptrRGB->header.stamp.toSec());
+
+    ORB_SLAM2::Tracking* tracker=mpSLAM->getTracker();
+    //get last frame
+    ORB_SLAM2::Frame frame=tracker->getCurrentFrame();
+    cv::Mat cam_center=frame.GetCameraCenter();
+
+    std::cout << "Last Pose:" << cam_center << "\n";
 }
 
 
