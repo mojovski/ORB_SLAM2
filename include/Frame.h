@@ -76,7 +76,12 @@ public:
 
     // Returns inverse of rotation
     inline cv::Mat GetRotationInverse(){
-        return mRwc.clone();
+        return mRwc.clone(); //of type float
+    }
+
+    cv::Mat GetRotation()
+    {
+        return mRwc.clone().t();
     }
 
     // Check if a MapPoint is in the frustum of the camera

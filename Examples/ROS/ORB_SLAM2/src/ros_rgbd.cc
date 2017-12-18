@@ -30,11 +30,28 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Pose.h>
+
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
+#include <tf/transform_broadcaster.h>
+#include <tf2/convert.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2/LinearMath/Matrix3x3.h>
+#include <tf2/LinearMath/Vector3.h>
+
 #include<opencv2/core/core.hpp>
 
 #include"../../../include/System.h"
 
 using namespace std;
+
+ros::Publisher pub_pose;
+
+//converts cv rot and sv pos to ros pose
+geometry_msgs::Pose poseMatrixToMsg(cv::Mat & R, cv::Mat & t);
+
 
 class ImageGrabber
 {
@@ -70,6 +87,11 @@ int main(int argc, char **argv)
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> sync_pol;
     message_filters::Synchronizer<sync_pol> sync(sync_pol(50), rgb_sub,depth_sub);
     sync.registerCallback(boost::bind(&ImageGrabber::GrabRGBD,&igb,_1,_2));
+
+    //register ouput
+    pub_pose = nh.advertise< geometry_msgs::PoseStamped >("/camera_pose", 5, true);
+
+
 
     ros::spin();
 
@@ -115,8 +137,51 @@ void ImageGrabber::GrabRGBD(const sensor_msgs::ImageConstPtr& msgRGB,const senso
     //get last frame
     ORB_SLAM2::Frame frame=tracker->getCurrentFrame();
     cv::Mat cam_center=frame.GetCameraCenter();
+    cv::Mat cam_rot=frame.GetRotation(); //TODO: Check what it means: cam in world, or world in cam
 
-    std::cout << "Last Pose:" << cam_center << "\n";
+    std::cout << "Last Position:" << cam_center << "\n";
+
+    //PUBLISH THE POSE IN ROS
+    geometry_msgs::PoseStamped pose_stamped_msg;
+    pose_stamped_msg.header = cv_ptrRGB->header; //TODO: Check if header.frame_id = "camera_link"; is required (example in RealSense)
+    pose_stamped_msg.pose = poseMatrixToMsg(cam_rot, cam_center);
+    pub_pose.publish(pose_stamped_msg);
+
+
+
+}
+
+geometry_msgs::Pose poseMatrixToMsg(cv::Mat & R, cv::Mat & t)
+{
+  tf2::Matrix3x3 rotMat = tf2::Matrix3x3(
+                            R.at<float>(0, 0),
+                            R.at<float>(0, 1),
+                            R.at<float>(0, 2),
+                            R.at<float>(1, 0),
+                            R.at<float>(1, 1),
+                            R.at<float>(1, 2),
+                            R.at<float>(2, 0),
+                            R.at<float>(2, 1),
+                            R.at<float>(2, 2)
+                          );
+  tf2::Quaternion quat;
+  rotMat.getRotation(quat);
+
+
+  geometry_msgs::Quaternion quat_msg;
+  tf2::convert<tf2::Quaternion, geometry_msgs::Quaternion>(quat, quat_msg);
+
+  geometry_msgs::Point point_msg;
+  point_msg.x = t.at<float>(0);
+  point_msg.y = t.at<float>(1);
+  point_msg.z = t.at<float>(2);
+
+  geometry_msgs::Pose pose_msg;
+  pose_msg.orientation = quat_msg;
+  pose_msg.position = point_msg;
+
+
+  return pose_msg;
 }
 
 
