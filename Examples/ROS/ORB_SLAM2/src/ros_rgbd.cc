@@ -137,7 +137,7 @@ void ImageGrabber::GrabRGBD(const sensor_msgs::ImageConstPtr& msgRGB,const senso
     //get last frame
     ORB_SLAM2::Frame frame=tracker->getCurrentFrame();
     cv::Mat cam_center=frame.GetCameraCenter();
-    cv::Mat cam_rot=frame.GetRotation(); //TODO: Check what it means: cam in world, or world in cam
+    cv::Mat cam_rot=frame.GetRotationInverse(); //TODO: Check what it means: cam in world, or world in cam
 
     std::cout << "Last Position:" << cam_center << "\n";
 
