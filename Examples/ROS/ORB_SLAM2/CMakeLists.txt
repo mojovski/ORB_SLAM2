@@ -41,6 +41,12 @@ endif()
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
 
+
+set(BOOST_COMPONENTS iostreams system thread regex filesystem coroutine context)
+find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+
+MESSAGE(STATUS "BOOST FOUND? ${Boost_FOUND}, Libs: ${Boost_LIBRARIES}")
+
 include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/../../../
@@ -52,6 +58,7 @@ set(LIBS
 ${OpenCV_LIBS} 
 ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
+${Boost_LIBRARIES}
 ${PROJECT_SOURCE_DIR}/../../../Thirdparty/DBoW2/lib/libDBoW2.so
 ${PROJECT_SOURCE_DIR}/../../../Thirdparty/g2o/lib/libg2o.so
 ${PROJECT_SOURCE_DIR}/../../../lib/libORB_SLAM2.so
